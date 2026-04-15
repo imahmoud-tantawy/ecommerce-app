@@ -67,7 +67,7 @@ export default function CheckoutForm({ cart }: CheckoutFormProps) {
           toast.error(res.message || 'Failed to place order')
         }
       } else {
-        const res = await createCheckoutSession(cart.data._id, formData)
+        const res = await createCheckoutSession(cart.data._id, formData, window.location.origin)
         if (isActionError(res)) {
           toast.error(res.message)
         } else if (res.status === 'success') {

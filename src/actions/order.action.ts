@@ -69,14 +69,21 @@ export async function createCashOrder(cartId: string, shippingAddress: { details
     }
 }
 
-export async function createCheckoutSession(cartId: string, shippingAddress: { details: string, phone: string, city: string }) {
+export async function createCheckoutSession(
+    cartId: string,
+    shippingAddress: { details: string, phone: string, city: string },
+    clientBaseUrl?: string
+) {
     try {
         const token = await getUserToken()
         if (!token) return actionError("Please login first.")
 
-        const baseUrl = await getBaseUrl()
+        const clientOrigin = parseBaseUrl(clientBaseUrl)
+        const serverOrigin = await getBaseUrl()
+        const isProd = process.env.NODE_ENV === "production"
+        const baseUrl = clientOrigin && (!isProd || !isLocalOrigin(clientOrigin)) ? clientOrigin : serverOrigin
 
-        const response = await fetch(`https://ecommerce.routemisr.com/api/v1/orders/checkout-session/${cartId}?url=${encodeURIComponent(baseUrl)}`, {
+        const response = await fetch(`https://ecommerce.routemisr.com/api/v1/orders/checkout-session/${cartId}?url=${baseUrl}`, {
             method: "POST",
             body: JSON.stringify({ shippingAddress }),
             headers: {
